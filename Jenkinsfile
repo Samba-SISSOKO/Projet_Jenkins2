@@ -17,16 +17,13 @@ pipeline {
             }
         }
 
-        stage('Code Quality Analysis') {
+        stage('Build') {
             steps {
-                echo 'Running SonarQube analysis...'
-                // Exécuter l'analyse SonarQube
-                withSonarQubeEnv('SonarQube') { // Nom de l'instance Sonar dans Jenkins
-                    bat 'mvn sonar:sonar -Dsonar.projectKey=nom_du_projet'
-                }
+                echo 'Building the project...'
+                // Commande Maven pour compiler le projet (en utilisant bat sur Windows)
+                bat 'mvn clean compile'
             }
         }
-
 
         stage('Test') {
             steps {
@@ -42,16 +39,15 @@ pipeline {
             }
         }
 
-        
-
-        stage('Build') {
+        stage('Code Quality Analysis') {
             steps {
-                echo 'Building the project...'
-                // Commande Maven pour compiler le projet (en utilisant bat sur Windows)
-                bat 'mvn clean compile'
+                echo 'Running SonarQube analysis...'
+                // Exécuter l'analyse SonarQube
+                withSonarQubeEnv('SonarQube') { // Nom de l'instance Sonar dans Jenkins
+                    bat 'mvn sonar:sonar -Dsonar.projectKey=nom_du_projet'
+                }
             }
         }
-
         
 
         stage('Package') {
