@@ -1,78 +1,64 @@
 pipeline {
     agent any
 
-    environment {
-        // Vous pouvez définir des variables globales ici
-        MAVEN_HOME = '/usr/share/maven' // Chemin de Maven sur l'agent Jenkins
-        JAVA_HOME = '/usr/lib/jvm/java-11-openjdk' // Chemin de Java
-        PATH = "${MAVEN_HOME}/bin:${JAVA_HOME}/bin:${env.PATH}"
-        SONARQUBE_SERVER = 'samba' // Nom du serveur SonarQube configuré dans Jenkins
+    tools {
+        // Assurez-vous que Maven et Java sont correctement configurés dans Jenkins
+        maven 'Maven'  // Nom de l'installation Maven dans "Global Tool Configuration"
+        jdk 'JDK11'    // Nom de l'installation JDK dans "Global Tool Configuration"
     }
 
     stages {
-        stage('Checkout') {
+        stage('Preparation') {
             steps {
-                // Cloner le dépôt Git
-                checkout scm
+                echo 'Preparation: Nettoyage du workspace'
+                bat 'del /q /s *.* || echo Rien à supprimer'
             }
         }
 
         stage('Build') {
             steps {
-                echo 'Building the project...'
-                // Commande Maven pour compiler le projet
-                sh 'mvn clean compile'
+                echo 'Etape de Build: Compilation du projet'
+                bat 'mvn clean compile'
             }
         }
 
         stage('Test') {
             steps {
-                echo 'Running tests...'
-                // Commande Maven pour exécuter les tests
-                sh 'mvn test'
-            }
-            post {
-                always {
-                    // Publier les rapports de test JUnit
-                    junit '**/target/surefire-reports/*.xml'
-                }
+                echo 'Etape de Test: Exécution des tests unitaires'
+                bat 'mvn test'
             }
         }
 
         stage('Code Quality Analysis') {
             steps {
-                echo 'Running SonarQube analysis...'
-                // Exécuter l'analyse SonarQube
-                withSonarQubeEnv('samba') { // Nom de l'instance Sonar dans Jenkins
-                    sh 'mvn sonar:sonar -Dsonar.projectKey=nom_du_projet'
+                echo 'Analyse de la qualité de code avec SonarQube'
+                withSonarQubeEnv('SonarQube') { // Remplacez 'SonarQube' par le nom de votre serveur dans Jenkins
+                    bat 'mvn sonar:sonar -Dsonar.projectKey=your-project-key'
                 }
             }
         }
 
         stage('Package') {
             steps {
-                echo 'Packaging the application...'
-                // Construire le package (génération du fichier .jar)
-                sh 'mvn package'
+                echo 'Etape de Packaging: Création du package JAR/WAR'
+                bat 'mvn package'
             }
-            post {
-                success {
-                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-                }
+        }
+
+        stage('Archive') {
+            steps {
+                echo 'Archivage des fichiers générés'
+                archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
             }
         }
     }
 
     post {
         success {
-            echo 'Pipeline completed successfully!'
+            echo 'Pipeline terminé avec succès.'
         }
         failure {
-            echo 'Pipeline failed!'
-        }
-        always {
-            // Nettoyer les fichiers temporaires
-            cleanWs()
+            echo 'Pipeline échoué.'
         }
     }
 }
