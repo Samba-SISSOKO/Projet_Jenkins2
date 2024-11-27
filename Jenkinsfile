@@ -2,28 +2,18 @@ pipeline {
     agent any
 
     environment {
-        // Définir des variables d'environnement globales
-        MAVEN_HOME = '/usr/share/maven'  // Chemin de Maven sur l'agent Jenkins
-        JAVA_HOME = '/usr/lib/jvm/java-11-openjdk'  // Chemin de Java
+        // Assurez-vous que la version de Java correspond à Java 17
+        JAVA_HOME = tool name: 'JDK 17', type: 'JDK' // 'JDK 17' doit correspondre au nom de l'installation dans Jenkins
+        MAVEN_HOME = '/usr/share/maven' // Chemin de Maven sur l'agent Jenkins
         PATH = "${MAVEN_HOME}/bin:${JAVA_HOME}/bin:${env.PATH}"
-        SONARQUBE_SERVER = 'SonarQube'  // Nom de l'instance SonarQube dans Jenkins
+        SONARQUBE_SERVER = 'SonarQube' // Nom du serveur SonarQube configuré dans Jenkins
     }
 
     stages {
         stage('Checkout') {
             steps {
-                script {
-                    try {
-                        echo "Cloning the repository from GitHub..."
-                        // Cloner le dépôt depuis GitHub, sur la branche master
-                        checkout([$class: 'GitSCM', 
-                                  branches: [[name: 'refs/heads/master']],  // Spécifier la branche master
-                                  userRemoteConfigs: [[url: 'https://github.com/Samba-SISSOKO/Projet_Jenkins2']]])  // URL du dépôt public
-                    } catch (Exception e) {
-                        echo "Checkout failed: ${e.getMessage()}"
-                        throw e  // Relance l'erreur pour que le pipeline échoue ici
-                    }
-                }
+                // Cloner le dépôt Git
+                checkout scm
             }
         }
 
