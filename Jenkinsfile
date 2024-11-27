@@ -6,7 +6,7 @@ pipeline {
         MAVEN_HOME = '/usr/share/maven' // Chemin de Maven sur l'agent Jenkins
         JAVA_HOME = '/usr/lib/jvm/java-11-openjdk' // Chemin de Java
         PATH = "${MAVEN_HOME}/bin:${JAVA_HOME}/bin:${env.PATH}"
-        SONARQUBE_SERVER = 'SonarQube' // Nom du serveur SonarQube configuré dans Jenkins
+        SONARQUBE_SERVER = 'samba' // Nom du serveur SonarQube configuré dans Jenkins
     }
 
     stages {
@@ -43,7 +43,7 @@ pipeline {
             steps {
                 echo 'Running SonarQube analysis...'
                 // Exécuter l'analyse SonarQube
-                withSonarQubeEnv('SonarQube') { // Nom de l'instance Sonar dans Jenkins
+                withSonarQubeEnv('samba') { // Nom de l'instance Sonar dans Jenkins
                     sh 'mvn sonar:sonar -Dsonar.projectKey=nom_du_projet'
                 }
             }
