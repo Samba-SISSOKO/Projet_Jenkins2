@@ -1,44 +1,79 @@
-                   pipeline {
-                       agent any
+pipeline {
+    agent any
 
-                       environment {
-                           SONARQUBE_TOKEN = credentials('sonarcloud-token')  // Token pour l'authentification
-                       }
+    tools {
+        maven 'Maven' // Nom configuré dans "Global Tool Configuration"
+    }
 
-                       stages {
-                           stage('Checkout') {
-                               steps {
-                                   checkout scm  // Cloner le dépôt
-                               }
-                           }
+    environment {
+        JAVA_HOME = 'C:\\Program Files\\OpenLogic\\jdk-17.0.13.11-hotspot' // Remplacez par le chemin correct
+        PATH = "${JAVA_HOME}\\bin:${env.PATH}"
+        SONARQUBE_SERVER = 'SonarQube' // Nom configuré dans Jenkins pour SonarQube
+        SONAR_TOKEN = '3c6f0dd8bcc2c6fef8ce19cd0f01c5eef6eb789f'  // Nouveau jeton SonarCloud
+    }
 
-                           stage('Build') {
-                               steps {
-                                   sh 'mvn clean compile'  // Compiler le projet
-                               }
-                           }
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Cloning repository...'
+                checkout scm
+            }
+        }
 
-                           stage('Test') {
-                               steps {
-                                   sh 'mvn test'  // Lancer les tests
-                               }
-                           }
+        stage('Build') {
+            steps {
+                echo 'Building the project...'
+                bat 'mvn clean compile'
+            }
+        }
 
-                           stage('Code Quality Analysis') {
-                               steps {
-                                   script {
-                                       // SonarCloud analysis
-                                       withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONAR_TOKEN')]) {
-                                           sh "mvn clean verify sonar:sonar -Dsonar.projectKey=your_project_key -Dsonar.organization=your_organization -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${SONAR_TOKEN}"
-                                       }
-                                   }
-                               }
-                           }
+        stage('Test') {
+            steps {
+                echo 'Running tests...'
+                bat 'mvn test'
+            }
+            post {
+                always {
+                    junit '**/target/surefire-reports/*.xml' // Publie les résultats des tests
+                }
+            }
+        }
 
-                           stage('Package') {
-                               steps {
-                                   sh 'mvn package'  // Créer le package
-                               }
-                           }
-                       }
-                   }
+        stage('Code Quality Analysis') {
+            steps {
+                echo 'Running SonarCloud analysis...'
+                bat '''
+                    mvn clean verify sonar:sonar \
+                    -Dsonar.projectKey=Samba-SISSOKO_Projet_Jenkins2 \
+                    -Dsonar.organization=samba \
+                    -Dsonar.host.url=https://sonarcloud.io \
+                    -Dsonar.login=${SONAR_TOKEN}
+                '''
+            }
+        }
+
+        stage('Package') {
+            steps {
+                echo 'Packaging the application...'
+                bat 'mvn package'
+            }
+            post {
+                success {
+                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+        always {
+            cleanWs() // Nettoie les fichiers temporaires
+        }
+    }
+}
