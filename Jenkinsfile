@@ -17,6 +17,16 @@ pipeline {
             }
         }
 
+        stage('Code Quality Analysis') {
+            steps {
+                echo 'Running SonarQube analysis...'
+                // Exécuter l'analyse SonarQube
+                withSonarQubeEnv('SonarQube') { // Nom de l'instance Sonar dans Jenkins
+                    bat 'mvn sonar:sonar -Dsonar.projectKey=nom_du_projet'
+                }
+            }
+        }
+
 
         stage('Test') {
             steps {
@@ -32,15 +42,7 @@ pipeline {
             }
         }
 
-        stage('Code Quality Analysis') {
-            steps {
-                echo 'Running SonarQube analysis...'
-                // Exécuter l'analyse SonarQube
-                withSonarQubeEnv('SonarQube') { // Nom de l'instance Sonar dans Jenkins
-                    bat 'mvn sonar:sonar -Dsonar.projectKey=nom_du_projet'
-                }
-            }
-        }
+        
 
         stage('Build') {
             steps {
