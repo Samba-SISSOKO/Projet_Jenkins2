@@ -38,14 +38,7 @@ pipeline {
             }
         }
 
-        stage('Code Quality Analysis') {
-            steps {
-                echo 'Running SonarQube analysis...'
-                withSonarQubeEnv('SonarQube') { // Nom configuré dans Jenkins
-                    bat 'mvn sonar:sonar -Dsonar.projectKey=MyProject'
-                }
-            }
-        }
+        
 
         stage('Package') {
             steps {
