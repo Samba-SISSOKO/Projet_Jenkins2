@@ -17,13 +17,6 @@ pipeline {
             }
         }
 
-        stage('Build') {
-            steps {
-                echo 'Building the project...'
-                // Commande Maven pour compiler le projet (en utilisant bat sur Windows)
-                bat 'mvn clean compile'
-            }
-        }
 
         stage('Test') {
             steps {
@@ -48,6 +41,16 @@ pipeline {
                 }
             }
         }
+
+        stage('Build') {
+            steps {
+                echo 'Building the project...'
+                // Commande Maven pour compiler le projet (en utilisant bat sur Windows)
+                bat 'mvn clean compile'
+            }
+        }
+
+        
 
         stage('Package') {
             steps {
