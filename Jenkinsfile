@@ -1,11 +1,12 @@
+
 pipeline {
     agent any
 
     environment {
-        // Utilisation de l'outil Java 17 configuré dans Jenkins
-        JAVA_HOME = tool name: 'JDK 17', type: 'JDK'  // Nom de l'installation de Java dans Jenkins
-        MAVEN_HOME = '/usr/share/maven' // Si Maven est installé sur votre machine
-        PATH = "${MAVEN_HOME}/bin:${JAVA_HOME}/bin:${env.PATH}"
+        // Vous pouvez définir des variables globales ici
+        MAVEN_HOME = 'C:\\Program Files\\Apache\\maven' // Chemin de Maven sur l'agent Jenkins
+        JAVA_HOME = 'C:\\Program Files\\Java\\jdk-11'   // Chemin de Java
+        PATH = "${MAVEN_HOME}\\bin;${JAVA_HOME}\\bin;${env.PATH}"
         SONARQUBE_SERVER = 'SonarQube' // Nom du serveur SonarQube configuré dans Jenkins
     }
 
@@ -20,16 +21,16 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the project...'
-                // Commande Maven pour compiler le projet
-                sh 'mvn clean compile -Dmaven.compiler.source=17 -Dmaven.compiler.target=17'
+                // Commande Maven pour compiler le projet (en utilisant bat sur Windows)
+                bat 'mvn clean compile'
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                // Commande Maven pour exécuter les tests
-                sh 'mvn test'
+                // Commande Maven pour exécuter les tests (en utilisant bat sur Windows)
+                bat 'mvn test'
             }
             post {
                 always {
@@ -44,16 +45,17 @@ pipeline {
                 echo 'Running SonarQube analysis...'
                 // Exécuter l'analyse SonarQube
                 withSonarQubeEnv('SonarQube') { // Nom de l'instance Sonar dans Jenkins
-                    sh 'mvn sonar:sonar -Dsonar.projectKey=nom_du_projet'
+                    bat 'mvn sonar:sonar -Dsonar.projectKey=nom_du_projet'
                 }
             }
         }
+        
 
         stage('Package') {
             steps {
                 echo 'Packaging the application...'
                 // Construire le package (génération du fichier .jar)
-                sh 'mvn package'
+                bat 'mvn package'
             }
             post {
                 success {
