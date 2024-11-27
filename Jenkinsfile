@@ -1,20 +1,20 @@
-
-
 pipeline {
     agent any
 
+    tools {
+        maven 'Maven' // Nom configuré dans "Global Tool Configuration"
+    }
+
     environment {
-        // Vous pouvez définir des variables globales ici
-        MAVEN_HOME = 'C:\\Program Files\\Apache\\maven' // Chemin de Maven sur l'agent Jenkins
-        JAVA_HOME = 'C:\\Program Files\\Java\\jdk-11'   // Chemin de Java
-        PATH = "${MAVEN_HOME}\\bin;${JAVA_HOME}\\bin;${env.PATH}"
-        SONARQUBE_SERVER = 'SonarQube' // Nom du serveur SonarQube configuré dans Jenkins
+        JAVA_HOME = 'C:\\Program Files\\OpenLogic\\jdk-17.0.13.11-hotspot' // Remplacez par le chemin correct
+        PATH = "${JAVA_HOME}\\bin:${env.PATH}"
+        SONARQUBE_SERVER = 'SonarQube' // Nom configuré dans Jenkins pour SonarQube
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Cloner le dépôt Git
+                echo 'Cloning repository...'
                 checkout scm
             }
         }
@@ -22,7 +22,6 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the project...'
-                // Commande Maven pour compiler le projet (en utilisant bat sur Windows)
                 bat 'mvn clean compile'
             }
         }
@@ -30,13 +29,11 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                // Commande Maven pour exécuter les tests (en utilisant bat sur Windows)
                 bat 'mvn test'
             }
             post {
                 always {
-                    // Publier les rapports de test JUnit
-                    junit '**/target/surefire-reports/*.xml'
+                    junit '**/target/surefire-reports/*.xml' // Publie les résultats des tests
                 }
             }
         }
@@ -44,18 +41,15 @@ pipeline {
         stage('Code Quality Analysis') {
             steps {
                 echo 'Running SonarQube analysis...'
-                // Exécuter l'analyse SonarQube
-                withSonarQubeEnv('SonarQube') { // Nom de l'instance Sonar dans Jenkins
-                    bat 'mvn sonar:sonar -Dsonar.projectKey=nom_du_projet'
+                withSonarQubeEnv('SonarQube') { // Nom configuré dans Jenkins
+                    bat 'mvn sonar:sonar -Dsonar.projectKey=MyProject'
                 }
             }
         }
-        
 
         stage('Package') {
             steps {
                 echo 'Packaging the application...'
-                // Construire le package (génération du fichier .jar)
                 bat 'mvn package'
             }
             post {
@@ -74,8 +68,7 @@ pipeline {
             echo 'Pipeline failed!'
         }
         always {
-            // Nettoyer les fichiers temporaires
-            cleanWs()
+            cleanWs() // Nettoie les fichiers temporaires
         }
     }
 }
