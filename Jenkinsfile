@@ -1,50 +1,82 @@
 pipeline {
     agent any
 
+    tools {
+        maven 'Maven' // Nom configuré dans "Global Tool Configuration"
+    }
+
     environment {
+        JAVA_HOME = 'C:\\Program Files\\OpenLogic\\jdk-17.0.13.11-hotspot' // Remplacez par le chemin correct
+        PATH = "${JAVA_HOME}\\bin:${env.PATH}"
+        SONARQUBE_SERVER = 'SonarQube' // Nom configuré dans Jenkins pour SonarQube
         SONAR_TOKEN = '3496d37c0a7393e0f03517ac76363b88f47e61f8'  // Votre jeton SonarCloud
     }
 
     stages {
         stage('Checkout') {
             steps {
-                checkout scm  // Cloner le dépôt
+                echo 'Cloning repository...'
+                checkout scm
             }
         }
 
         stage('Build') {
             steps {
-                sh 'mvn clean compile'  // Compiler le projet
+                echo 'Building the project...'
+                bat 'mvn clean compile'
             }
         }
 
         stage('Test') {
             steps {
-                sh 'mvn test'  // Lancer les tests
+                echo 'Running tests...'
+                bat 'mvn test'
+            }
+            post {
+                always {
+                    junit '**/target/surefire-reports/*.xml' // Publie les résultats des tests
+                }
             }
         }
 
         stage('Code Quality Analysis') {
             steps {
+                echo 'Running SonarCloud analysis...'
                 script {
                     // Exécution de l'analyse SonarCloud
-                    withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONAR_TOKEN')]) {
-                        sh """
-                            mvn clean verify sonar:sonar \
-                            -Dsonar.projectKey=Samba-SISSOKO_Projet_Jenkins2 \
-                            -Dsonar.organization=samba \
-                            -Dsonar.host.url=https://sonarcloud.io \
-                            -Dsonar.login=${SONAR_TOKEN}
-                        """
-                    }
+                    sh """
+                        mvn clean verify sonar:sonar \
+                        -Dsonar.projectKey=Samba-SISSOKO_Projet_Jenkins2 \
+                        -Dsonar.organization=samba \
+                        -Dsonar.host.url=https://sonarcloud.io \
+                        -Dsonar.login=${SONAR_TOKEN}
+                    """
                 }
             }
         }
 
         stage('Package') {
             steps {
-                sh 'mvn package'  // Créer le package
+                echo 'Packaging the application...'
+                bat 'mvn package'
             }
+            post {
+                success {
+                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+        always {
+            cleanWs() // Nettoie les fichiers temporaires
         }
     }
 }
