@@ -2,17 +2,18 @@ pipeline {
     agent any
 
     environment {
-        // Assurez-vous que la version de Java correspond à Java 17
-        JAVA_HOME = tool name: 'JDK 17', type: 'JDK' // 'JDK 17' doit correspondre au nom de l'installation dans Jenkins
+        // Définir des variables globales pour Maven et Java
         MAVEN_HOME = '/usr/share/maven' // Chemin de Maven sur l'agent Jenkins
+        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk' // Chemin de Java 17
         PATH = "${MAVEN_HOME}/bin:${JAVA_HOME}/bin:${env.PATH}"
-        SONARQUBE_SERVER = 'SonarQube' // Nom du serveur SonarQube configuré dans Jenkins
+        SONARQUBE_SERVER = 'SonarQube' // Nom de l'instance SonarQube dans Jenkins
     }
 
     stages {
         stage('Checkout') {
             steps {
                 // Cloner le dépôt Git
+                echo 'Cloning the repository...'
                 checkout scm
             }
         }
@@ -33,7 +34,7 @@ pipeline {
             }
             post {
                 always {
-                    // Publier les rapports de test JUnit
+                    // Publier les rapports de test JUnit si disponibles
                     junit '**/target/surefire-reports/*.xml'
                 }
             }
@@ -57,6 +58,7 @@ pipeline {
             }
             post {
                 success {
+                    // Archiver les artefacts générés
                     archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
                 }
             }
@@ -71,8 +73,22 @@ pipeline {
             echo 'Pipeline failed!'
         }
         always {
-            // Nettoyer les fichiers temporaires
+            // Étapes de nettoyage et débogage
+            echo 'Cleaning workspace and checking file status...'
+
+            // Déboguer l'état du workspace avant nettoyage
+            echo 'Listing files in the workspace before cleaning:'
+            sh 'ls -la'
+
+            // Nettoyer le workspace après chaque exécution
             cleanWs()
+
+            // Déboguer l'état du workspace après nettoyage
+            echo 'Workspace cleaned, listing files after cleanup:'
+            sh 'ls -la'
+
+            // Nettoyer les fichiers temporaires
+            echo 'Cleaning up temporary files...'
         }
     }
 }
