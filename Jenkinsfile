@@ -42,16 +42,13 @@ pipeline {
         stage('Code Quality Analysis') {
             steps {
                 echo 'Running SonarCloud analysis...'
-                script {
-                    // Exécution de l'analyse SonarCloud
-                    sh """
-                        mvn clean verify sonar:sonar \
-                        -Dsonar.projectKey=Samba-SISSOKO_Projet_Jenkins2 \
-                        -Dsonar.organization=samba \
-                        -Dsonar.host.url=https://sonarcloud.io \
-                        -Dsonar.login=${SONAR_TOKEN}
-                    """
-                }
+                bat '''
+                    mvn clean verify sonar:sonar \
+                    -Dsonar.projectKey=Samba-SISSOKO_Projet_Jenkins2 \
+                    -Dsonar.organization=samba \
+                    -Dsonar.host.url=https://sonarcloud.io \
+                    -Dsonar.login=${SONAR_TOKEN}
+                '''
             }
         }
 
