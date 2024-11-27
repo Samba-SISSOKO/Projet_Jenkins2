@@ -2,34 +2,44 @@ pipeline {
     agent any
 
     environment {
-        // Vous pouvez définir des variables globales ici
-        MAVEN_HOME = 'C:\\Program Files\\Apache\\maven' // Chemin de Maven sur l'agent Jenkins
-        JAVA_HOME = 'C:\\Program Files\\Java\\jdk-11'   // Chemin de Java
-        PATH = "${MAVEN_HOME}\\bin;${JAVA_HOME}\\bin;${env.PATH}"
-        SONARQUBE_SERVER = 'SonarQube' // Nom du serveur SonarQube configuré dans Jenkins
+        // Définir des variables d'environnement globales
+        MAVEN_HOME = '/usr/share/maven'  // Chemin de Maven sur l'agent Jenkins
+        JAVA_HOME = '/usr/lib/jvm/java-11-openjdk'  // Chemin de Java
+        PATH = "${MAVEN_HOME}/bin:${JAVA_HOME}/bin:${env.PATH}"
+        SONARQUBE_SERVER = 'SonarQube'  // Nom de l'instance SonarQube dans Jenkins
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Cloner le dépôt Git
-                checkout scm
+                script {
+                    try {
+                        echo "Cloning the repository from GitHub..."
+                        // Cloner le dépôt depuis GitHub, sur la branche master
+                        checkout([$class: 'GitSCM', 
+                                  branches: [[name: 'refs/heads/master']],  // Spécifier la branche master
+                                  userRemoteConfigs: [[url: 'https://github.com/Samba-SISSOKO/Projet_Jenkins2']]])  // URL du dépôt public
+                    } catch (Exception e) {
+                        echo "Checkout failed: ${e.getMessage()}"
+                        throw e  // Relance l'erreur pour que le pipeline échoue ici
+                    }
+                }
             }
         }
 
         stage('Build') {
             steps {
                 echo 'Building the project...'
-                // Commande Maven pour compiler le projet (en utilisant bat sur Windows)
-                bat 'mvn clean compile'
+                // Commande Maven pour compiler le projet
+                sh 'mvn clean compile'
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                // Commande Maven pour exécuter les tests (en utilisant bat sur Windows)
-                bat 'mvn test'
+                // Commande Maven pour exécuter les tests
+                sh 'mvn test'
             }
             post {
                 always {
@@ -44,17 +54,16 @@ pipeline {
                 echo 'Running SonarQube analysis...'
                 // Exécuter l'analyse SonarQube
                 withSonarQubeEnv('SonarQube') { // Nom de l'instance Sonar dans Jenkins
-                    bat 'mvn sonar:sonar -Dsonar.projectKey=nom_du_projet'
+                    sh 'mvn sonar:sonar -Dsonar.projectKey=nom_du_projet'
                 }
             }
         }
-        
 
         stage('Package') {
             steps {
                 echo 'Packaging the application...'
                 // Construire le package (génération du fichier .jar)
-                bat 'mvn package'
+                sh 'mvn package'
             }
             post {
                 success {
