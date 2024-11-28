@@ -8,8 +8,8 @@ pipeline {
     environment {
         JAVA_HOME = 'C:\\Program Files\\OpenLogic\\jdk-17.0.13.11-hotspot' // Remplacez par le chemin correct
         PATH = "${JAVA_HOME}\\bin:${env.PATH}"
-        SONARQUBE_URL = 'https://sonarcloud.io/project/information?id=Samba-SISSOKO_Projet_Jenkins2' // URL de SonarCloud
-        SONARQUBE_TOKEN = 'dcac9bc6971662ece67c67fb68b6d7a419cfc9d1'  // Jeton d'authentification pour SonarCloud
+        SONARQUBE_URL = 'https://sonarcloud.io' // Définissez correctement l'URL de SonarCloud ici
+        SONAR_TOKEN = 'dcac9bc6971662ece67c67fb68b6d7a419cfc9d1' // Votre jeton SonarCloud
     }
 
     stages {
@@ -41,13 +41,13 @@ pipeline {
 
         stage('Code Quality Analysis') {
             steps {
-                echo 'Running SonarQube analysis...'
+                echo 'Running SonarCloud analysis...'
                 bat '''
                     mvn clean verify sonar:sonar \
                     -Dsonar.projectKey=Samba-SISSOKO_Projet_Jenkins2 \
                     -Dsonar.organization=samba \
-                    -Dsonar.host.url=${SONARQUBE_URL} \
-                    -Dsonar.login=${SONARQUBE_TOKEN}
+                    -Dsonar.host.url=${SONARQUBE_URL} \  // Utilisez la variable d'environnement correctement
+                    -Dsonar.login=${SONAR_TOKEN}
                 '''
             }
         }
