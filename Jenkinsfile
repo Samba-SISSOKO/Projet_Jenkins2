@@ -9,7 +9,7 @@ pipeline {
         JAVA_HOME = 'C:\\Program Files\\OpenLogic\\jdk-17.0.13.11-hotspot' // Remplacez par le chemin correct
         PATH = "${JAVA_HOME}\\bin:${env.PATH}"
         SONARQUBE_SERVER = 'SonarQube' // Nom configuré dans Jenkins pour SonarQube
-        SONAR_TOKEN = '3c6f0dd8bcc2c6fef8ce19cd0f01c5eef6eb789f'  // Nouveau jeton SonarCloud
+        SONAR_TOKEN = credentials('SONAR_TOKEN')  // Utilisation de Jenkins Credentials pour le jeton
     }
 
     stages {
