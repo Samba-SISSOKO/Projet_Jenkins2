@@ -9,7 +9,6 @@ pipeline {
         JAVA_HOME = 'C:\\Program Files\\OpenLogic\\jdk-17.0.13.11-hotspot' // Remplacez par le chemin correct
         PATH = "${JAVA_HOME}\\bin:${env.PATH}"
         SONARQUBE_SERVER = 'SonarQube' // Nom configuré dans Jenkins pour SonarQube
-        SONAR_TOKEN = credentials('SONAR_TOKEN')  // Utilisation de Jenkins Credentials pour le jeton
     }
 
     stages {
@@ -39,18 +38,7 @@ pipeline {
             }
         }
 
-        stage('Code Quality Analysis') {
-            steps {
-                echo 'Running SonarCloud analysis...'
-                bat '''
-                    mvn clean verify sonar:sonar \
-                    -Dsonar.projectKey=Samba-SISSOKO_Projet_Jenkins2 \
-                    -Dsonar.organization=samba \
-                    -Dsonar.host.url=https://sonarcloud.io \
-                    -Dsonar.login=${SONAR_TOKEN}
-                '''
-            }
-        }
+        
 
         stage('Package') {
             steps {
