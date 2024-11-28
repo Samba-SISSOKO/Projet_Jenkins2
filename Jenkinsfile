@@ -8,8 +8,8 @@ pipeline {
     environment {
         JAVA_HOME = 'C:\\Program Files\\OpenLogic\\jdk-17.0.13.11-hotspot' // Remplacez par le chemin correct
         PATH = "${JAVA_HOME}\\bin:${env.PATH}"
-        SONARQUBE_URL = 'http://localhost:8080' // Assurez-vous que l'URL de SonarQube soit correctement définie
-        SONARQUBE_TOKEN = 'dcac9bc6971662ece67c67fb68b6d7a419cfc9d1'  // Votre jeton SonarQube
+        SONARQUBE_URL = 'https://sonarcloud.io' // URL de SonarCloud
+        SONARQUBE_TOKEN = 'dcac9bc6971662ece67c67fb68b6d7a419cfc9d1'  // Jeton d'authentification pour SonarCloud
     }
 
     stages {
