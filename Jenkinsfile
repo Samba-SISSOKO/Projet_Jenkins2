@@ -37,7 +37,7 @@ pipeline {
             }
             post {
                 always {
-                    junit '**/target/surefire-reports/*.xml' // Publie les résultats des tests
+                    junit '**/target/surefire-reports/*.xml' 
                 }
             }
         }
