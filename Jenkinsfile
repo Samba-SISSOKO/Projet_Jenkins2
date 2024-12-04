@@ -46,11 +46,7 @@ pipeline {
             steps {
                 script {
                     echo 'Running SonarQube analysis...'
-                    bat "mvn sonar:sonar 
-                    -Dsonar.projectKey=${env.SONAR_PROJECT_KEY} 
-                    -Dsonar.organization=${env.SONAR_ORG_KEY} 
-                    -Dsonar.login=${env.SONAR_TOKEN} 
-                    -Dsonar.host.url=https://sonarcloud.io"
+                    bat "mvn sonar:sonar -Dsonar.projectKey=${env.SONAR_PROJECT_KEY} -Dsonar.organization=${env.SONAR_ORG_KEY} -Dsonar.login=${env.SONAR_TOKEN} -Dsonar.host.url=https://sonarcloud.io"
                 }
             }
         }
