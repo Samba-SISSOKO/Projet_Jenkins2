@@ -42,7 +42,7 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
+        stage('QualityCode Analysis') {
             steps {
                 script {
                     echo 'Running SonarQube analysis...'
